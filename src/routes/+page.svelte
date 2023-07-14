@@ -74,7 +74,7 @@
 	const revealF5 = () => {
 		fetchHandler();
 		showf5 = true;
-		tileColumns = 4;
+		tileColumns = 3;
 	}
 	const hideF5 = () => {
 		fetchHandler();
@@ -112,29 +112,30 @@
             <Button class="max-w-md mx-auto mb-3 p-1 pl-4" rounded large outline color="dark" on:click={revealF5}>
 				<b>Reveal</b><img src="/images/f5.svg" style="height: 32px; width:auto;" alt="reveal F5">
 			</Button>
+		{:else}
+            <Card class="grid grid-cols-1 gap-2 mb-2" style="width 400px; width:auto" on:click={hideF5}>
+			    <div class="grid grid-cols-2 gap-2">
+					<div>
+						<img src='/images/f5.svg' style="height:80px; width:auto" alt="DNS monitor logo" >
+						<h5 class="text-xs whitespace-nowrap mb-2 font-bold tracking-tight text-gray-900 dark:text-white">
+							F5 Distributed Cloud DNS
+						</h5>
+					</div>
+					<div class='content-end ml-2 mt-2'>
+						{#each dnsResultData.monitors as monitor}
+							{#if showf5 && monitor.name === f5TestName}
+							<ul>
+								<li class='text-sm break-keep'>latency: <b>{Math.round(monitor.latency)}ms</b></li>
+								<li class='text-sm break-keep'>avg: <b>{Math.round(monitor.averageLatency)}ms</b></li>
+								<li class='text-sm break-keep'>max: <b>{Math.round(monitor.maximumLatency)}ms</b></li>
+							</ul>
+							{/if}
+						{/each}
+					</div>
+				</div>
+			</Card>
 		{/if}
 		<div class="grid grid-cols-{tileColumns} gap-2">
-			{#each dnsResultData.monitors as monitor}
-				{#if showf5 && monitor.name === f5TestName}
-					<div class="max-w-md mx-auto">
-						<Card padding='sm' size='m' style="width:200px;" on:click={hideF5}>
-							<div class="flex justify-center">
-								<img src="/images/{monitor.logo}" style="height:48px; width:auto" alt="DNS monitor logo"><br/>
-							</div>
-							<div class="flex justify-center">
-								<h5 class="text-xs whitespace-nowrap mb-2 font-bold tracking-tight text-gray-900 dark:text-white">
-									{monitor.description}
-								</h5>
-							</div>
-							<ul>
-								<li class='text-xs break-keep'>latency: <b>{Math.round(monitor.latency)}ms</b></li>
-								<li class='text-xs break-keep'>avg: <b>{Math.round(monitor.averageLatency)}ms</b></li>
-								<li class='text-xs break-keep'>max: <b>{Math.round(monitor.maximumLatency)}ms</b></li>
-							</ul>
-						</Card>
-					</div>
-				{/if}
-			{/each}
 			{#each dnsResultData.monitors as monitor}
 				{#if monitor.name != f5TestName}
 					<div class="max-w-md mx-auto">
