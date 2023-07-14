@@ -1,13 +1,15 @@
-<script>
+<script lang="ts">
 	import { page } from '$app/stores';
-	import logo from '$lib/images/svelte-logo.svg';
+	import logo from '$lib/images/f5-xc-observe-logo.svg';
 	import github from '$lib/images/github.svg';
+	import { BarLoader } from 'svelte-loading-spinners';
+	import { loading } from '../stores';
 </script>
 
 <header>
 	<div class="corner">
-		<a href="https://kit.svelte.dev">
-			<img src={logo} alt="SvelteKit" />
+		<a href="https://f5-sp.console.ves.volterra.io/web/workspaces/observability/namespaces/default/synthetic-monitors/dns-monitors/all-monitors" target='_dns_monitors'>
+			<img src={logo} alt="F5 Distributed Cloud DNS Monitors" />
 		</a>
 	</div>
 
@@ -17,13 +19,10 @@
 		</svg>
 		<ul>
 			<li aria-current={$page.url.pathname === '/' ? 'page' : undefined}>
-				<a href="/">Home</a>
-			</li>
-			<li aria-current={$page.url.pathname === '/about' ? 'page' : undefined}>
-				<a href="/about">About</a>
-			</li>
-			<li aria-current={$page.url.pathname.startsWith('/sverdle') ? 'page' : undefined}>
-				<a href="/sverdle">Sverdle</a>
+				<a href="/">DNS Speed Test</a>
+				{#if $loading}
+		            <BarLoader size="60" color="#ff0000c2" unit="px" duration="1s" />
+		        {/if}
 			</li>
 		</ul>
 		<svg viewBox="0 0 2 3" aria-hidden="true">
@@ -32,7 +31,7 @@
 	</nav>
 
 	<div class="corner">
-		<a href="https://github.com/sveltejs/kit">
+		<a href="https://github.com/jgruberf5/f5xc-dns-speedtest">
 			<img src={github} alt="GitHub" />
 		</a>
 	</div>

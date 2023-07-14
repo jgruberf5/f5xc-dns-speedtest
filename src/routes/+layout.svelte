@@ -1,4 +1,5 @@
 <script>
+	import '../app.postcss';
 	import Header from './Header.svelte';
 	import './styles.css';
 </script>
@@ -11,7 +12,9 @@
 	</main>
 
 	<footer>
-		<p>visit <a href="https://kit.svelte.dev">kit.svelte.dev</a> to learn SvelteKit</p>
+		<p>
+			Visit <a href="https://www.f5.com/cloud">f5.com/cloud</a> to get started with F5 Distributed Cloud
+		</p>
 	</footer>
 </div>
 
