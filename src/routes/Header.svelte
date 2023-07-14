@@ -1,7 +1,5 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import logo from '$lib/images/f5-xc-observe-logo.svg';
-	import github from '$lib/images/github.svg';
 	import { BarLoader } from 'svelte-loading-spinners';
 	import { loading } from '../stores';
 </script>
@@ -9,7 +7,7 @@
 <header>
 	<div class="corner">
 		<a href="https://f5-sp.console.ves.volterra.io/web/workspaces/observability/namespaces/default/synthetic-monitors/dns-monitors/all-monitors" target='_dns_monitors'>
-			<img src={logo} alt="F5 Distributed Cloud DNS Monitors" />
+			<img src='/images/f5-xc-observe-logo.svg' alt="F5 Distributed Cloud DNS Monitors" />
 		</a>
 	</div>
 
@@ -32,7 +30,7 @@
 
 	<div class="corner">
 		<a href="https://github.com/jgruberf5/f5xc-dns-speedtest">
-			<img src={github} alt="GitHub" />
+			<img src='/images/github.svg' alt="GitHub" />
 		</a>
 	</div>
 </header>

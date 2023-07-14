@@ -33,7 +33,7 @@
         let updatedWinnerResults = [];
 		dnsResultData.results.forEach( winner => {
 			if(showf5) {
-				let iconOption = `<div style='boarder: none;'><img src='/src/lib/images/${winner.winnerLogo}' style='height: 24px; width:auto;' title='${winner.winnerLatency}ms' border='0'></div>`;
+				let iconOption = `<div style='boarder: none;'><img src='/images/${winner.winnerLogo}' style='height: 24px; width:auto;' title='${winner.winnerLatency}ms' border='0'></div>`;
 				updatedWinnerResults.push(
 					{
 						latLng: [winner.latitude, winner.longitude],
@@ -44,7 +44,7 @@
 					}
 				) 
 			} else {
-				let iconOption = `<div style='boarder: none;'><img src='/src/lib/images/${winner.winnerLogoWithoutF5}' style='height: 24px; width:auto;' title='${winner.winnerLatencyWithoutF5}ms' border='0'></div>`;
+				let iconOption = `<div style='boarder: none;'><img src='/images/${winner.winnerLogoWithoutF5}' style='height: 24px; width:auto;' title='${winner.winnerLatencyWithoutF5}ms' border='0'></div>`;
 				updatedWinnerResults.push(
 					{
 						latLng: [winner.latitude, winner.longitude],
@@ -110,7 +110,7 @@
 	{#if dnsResultData}
 	    {#if ! showf5}
             <Button class="max-w-md mx-auto mb-3 p-1 pl-4" rounded large outline color="dark" on:click={revealF5}>
-				<b>Reveal</b><img src="/src/lib/images/f5.svg" style="height: 32px; width:auto;">
+				<b>Reveal</b><img src="/images/f5.svg" style="height: 32px; width:auto;" alt="reveal F5">
 			</Button>
 		{/if}
 		<div class="grid grid-cols-{tileColumns} gap-2">
@@ -119,7 +119,7 @@
 					<div class="max-w-md mx-auto">
 						<Card padding='sm' size='m' style="width:200px;" on:click={hideF5}>
 							<div class="flex justify-center">
-								<img src="/src/lib/images/{monitor.logo}" style="height:48px; width:auto"><br/>
+								<img src="/images/{monitor.logo}" style="height:48px; width:auto" alt="DNS monitor logo"><br/>
 							</div>
 							<div class="flex justify-center">
 								<h5 class="text-xs whitespace-nowrap mb-2 font-bold tracking-tight text-gray-900 dark:text-white">
@@ -140,7 +140,7 @@
 					<div class="max-w-md mx-auto">
 						<Card padding='sm' size='m' style="width:200px;">
 							<div class="flex justify-center">
-								<img src="/src/lib/images/{monitor.logo}" style="height:48px; width:auto"><br/>
+								<img src="/images/{monitor.logo}" style="height:48px; width:auto" alt="DNS monitor logo"><br/>
 							</div>
 							<div class="flex justify-center">
 								<h5 class="text-xs whitespace-nowrap mb-2 font-bold tracking-tight text-gray-900 dark:text-white">
@@ -163,7 +163,7 @@
 <section>
 	<div class='flex justify-center mb-3 mt-3'>
 		{#if dnsResultData}
-		    <a on:click={togglelData}>&Pi;</a><br/>
+		    <a alt='Toggle Data Visible' on:click={togglelData}>&Pi;</a><br/>
 		{/if}
 	</div>
 	<div class='flex justify-center mb-3 mt-3'>
@@ -180,10 +180,6 @@
 		justify-content: center;
 		align-items: center;
 		flex: 0.6;
-	}
-
-	h1 {
-		width: 100%;
 	}
 
 </style>
