@@ -1,8 +1,10 @@
-import { F5_XC_API_KEY } from '$env/static/private';
-import { F5_XC_TENANT } from '$env/static/private';
-import { F5_XC_DNS_MONITOR_NAMESPACE } from '$env/static/private';
-import { F5_XC_DNS_MONITOR_PREFIX } from '$env/static/private';
-import { F5_XC_F5_MONITOR_SUFFIX } from '$env/static/private';
+import { env } from '$env/dynamic/private';
+
+const F5_XC_API_KEY = env.F5_XC_API_KEY;
+const F5_XC_TENANT = env.F5_XC_TENANT;
+const F5_XC_DNS_MONITOR_NAMESPACE = env.F5_XC_DNS_MONITOR_NAMESPACE;
+const F5_XC_DNS_MONITOR_PREFIX = env.F5_XC_DNS_MONITOR_PREFIX;
+const F5_XC_F5_MONITOR_SUFFIX = env.F5_XC_F5_MONITOR_SUFFIX;
 
 const f5XCeaders = {
     'Authorization': `APIToken ${F5_XC_API_KEY}`
@@ -18,7 +20,7 @@ export async function getMonitors() {
     if(fetchedData) { dataAge =  endTime.getTime() - new Date(fetchedData.collected).getTime() };
     if(dataAge < 60000 ) { return fetchedData; }
     /* build cache of XC sites lat/long */
-    console.log(`retrieving monitoring details for prefix: ${F5_XC_DNS_MONITOR_PREFIX}`)
+    console.log(`retrieving monitoring details from ${F5_XC_TENANT}, in namespace: ${F5_XC_DNS_MONITOR_NAMESPACE}, with prefix: ${F5_XC_DNS_MONITOR_PREFIX}`)
     let f5xcRegionLatLongCache = {};
     
     const f5xcRELatLongLookupUrl = `https://${F5_XC_TENANT}.console.ves.volterra.io/api/config/namespaces/default/sites?report_fields=`;
