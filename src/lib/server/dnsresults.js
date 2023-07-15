@@ -12,6 +12,7 @@ const f5XCeaders = {
 const monitorsListUrl = `https://${F5_XC_TENANT}.console.ves.volterra.io/api/observability/synthetic_monitor/namespaces/${F5_XC_DNS_MONITOR_NAMESPACE}/v1_dns_monitors`;
 
 let fetchedData = undefined;
+let f5xcRegionLatLongCache = undefined;
 
 export async function getMonitors() {
     const endTime = new Date();
@@ -19,26 +20,28 @@ export async function getMonitors() {
     /* cache data for 1 minute */
     if(fetchedData) { dataAge =  endTime.getTime() - new Date(fetchedData.collected).getTime() };
     if(dataAge < 60000 ) { return fetchedData; }
-    /* build cache of XC sites lat/long */
-    console.log(`retrieving monitoring details from ${F5_XC_TENANT}, in namespace: ${F5_XC_DNS_MONITOR_NAMESPACE}, with prefix: ${F5_XC_DNS_MONITOR_PREFIX}`)
-    let f5xcRegionLatLongCache = {};
     
-    const f5xcRELatLongLookupUrl = `https://${F5_XC_TENANT}.console.ves.volterra.io/api/config/namespaces/default/sites?report_fields=`;
-    const f5xcRELatLongLookupResponse = await fetch(f5xcRELatLongLookupUrl,  { method: 'GET', headers: f5XCeaders });
-    const f5xcRELatLongList = await f5xcRELatLongLookupResponse.json();
-    f5xcRELatLongList.items.forEach( (site) => {
-        if(site.tenant === 'ves-io') {
-            for (const key in site.labels) {
-                if(key == 'ves.io/region') {
-                    // console.log(`adding f5xc region ${site.labels[key]} at lat: ${site.object.spec.gc_spec.coordinates.latitude}, long: ${site.object.spec.gc_spec.coordinates.longitude}`)
-                    f5xcRegionLatLongCache[site.labels[key]] = {
-                        latitude: site.object.spec.gc_spec.coordinates.latitude,
-                        longitude: site.object.spec.gc_spec.coordinates.longitude
+    /* build cache of XC sites lat/long */
+    if(! f5xcRegionLatLongCache) {
+        console.log(`retrieving monitoring details from ${F5_XC_TENANT}, in namespace: ${F5_XC_DNS_MONITOR_NAMESPACE}, with prefix: ${F5_XC_DNS_MONITOR_PREFIX}`)
+        f5xcRegionLatLongCache = {};
+        const f5xcRELatLongLookupUrl = `https://${F5_XC_TENANT}.console.ves.volterra.io/api/config/namespaces/default/sites?report_fields=`;
+        const f5xcRELatLongLookupResponse = await fetch(f5xcRELatLongLookupUrl,  { method: 'GET', headers: f5XCeaders });
+        const f5xcRELatLongList = await f5xcRELatLongLookupResponse.json();
+        f5xcRELatLongList.items.forEach( (site) => {
+            if(site.tenant === 'ves-io') {
+                for (const key in site.labels) {
+                    if(key == 'ves.io/region') {
+                        console.log(`adding f5xc region ${site.labels[key]} at lat: ${site.object.spec.gc_spec.coordinates.latitude}, long: ${site.object.spec.gc_spec.coordinates.longitude}`)
+                        f5xcRegionLatLongCache[site.labels[key]] = {
+                            latitude: site.object.spec.gc_spec.coordinates.latitude,
+                            longitude: site.object.spec.gc_spec.coordinates.longitude
+                        }
                     }
                 }
             }
-        }
-    });
+        });
+    }
 
     const monitors = {}
     const monitorResults = {}
