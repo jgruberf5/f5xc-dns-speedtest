@@ -63,9 +63,7 @@
 	};
 	onMount(async () => {
 		/* load initial data */
-		loading.set(true);
 		await fetchHandler()
-		loading.set(false);
 		/* start data fetch loop */
         fetcherInterval = setInterval(fetchHandler, 10000)
 	});

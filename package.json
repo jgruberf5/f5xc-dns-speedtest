@@ -9,7 +9,8 @@
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
 		"lint": "prettier --plugin-search-dir . --check . && eslint .",
 		"format": "prettier --plugin-search-dir . --write .",
-		"buildcontainers": "docker build -t f5xc-dns-speedtest ."
+		"buildcontainer": "docker build -t f5xc-dns-speedtest .",
+		"pushcontainer": "docker build -t f5xc-dns-speedtest && docker -t jgruberf5/f5xc-dns-speedtest:latest && docker push jgruberf5/f5xc-dns-speedtest:latest"
 	},
 	"devDependencies": {
 		"@fontsource/fira-mono": "^4.5.10",
