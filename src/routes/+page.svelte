@@ -28,7 +28,8 @@
 	const fetchHandler = async () => {
         loading.set(1);
 		dnsResultData = await fetch(`${window.location.origin}/dnsresults/`).then((x)=>x.json());
-        let updatedWinnerResults = [];
+        console.log(`fetched data for DNS monitors with prefix:${dnsResultData.includedMonitorPrefix}`)
+		let updatedWinnerResults = [];
 		dnsResultData.results.forEach( winner => {
 			if(showf5) {
 				let iconOption = `<div style='boarder: none;'><img src='/images/map-icon-${winner.winnerLogo}' style='width: 24px; height:auto;' title='${winner.winnerLatency}ms' border='0'></div>`;

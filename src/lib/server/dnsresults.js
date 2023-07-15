@@ -18,6 +18,7 @@ export async function getMonitors() {
     if(fetchedData) { dataAge =  endTime.getTime() - new Date(fetchedData.collected).getTime() };
     if(dataAge < 60000 ) { return fetchedData; }
     /* build cache of XC sites lat/long */
+    console.log(`retrieving monitoring details for prefix: ${F5_XC_DNS_MONITOR_PREFIX}`)
     let f5xcRegionLatLongCache = {};
     
     const f5xcRELatLongLookupUrl = `https://${F5_XC_TENANT}.console.ves.volterra.io/api/config/namespaces/default/sites?report_fields=`;
@@ -127,10 +128,10 @@ export async function getMonitors() {
     const monitorData = {
         monitors: monitorDataList,
         results: resultsDataList,
+        includedMonitorPrefix: F5_XC_DNS_MONITOR_PREFIX,
         f5MonitorSuffix: F5_XC_F5_MONITOR_SUFFIX,
         collected: endTime.toISOString()
     }
-    // console.log(`output: ${JSON.stringify(monitorData)}`);
     fetchedData = monitorData;
     return monitorData;
 }
