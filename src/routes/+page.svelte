@@ -12,7 +12,8 @@
 
 	let showdata = false;
 	let showf5 = false;
-	let tileColumns = 3;
+
+	let map = undefined;
 
     const mapOptions = {
         center: [53.137811, -35.737996],
@@ -26,45 +27,50 @@
     const tileLayerOptions = { };
 
 	const fetchHandler = async () => {
-        loading.set(1);
-		dnsResultData = await fetch(`${window.location.origin}/dnsresults/`).then((x)=>x.json());
-        console.log(`fetched data for DNS monitors with prefix:${dnsResultData.includedMonitorPrefix}`)
-		let updatedWinnerResults = [];
-		dnsResultData.results.forEach( winner => {
-			if(showf5) {
-				let iconOption = `<div style='boarder: none;'><img src='/images/map-icon-${winner.winnerLogo}' style='width: 24px; height:auto;' title='${winner.winnerLatency}ms' border='0'></div>`;
-				updatedWinnerResults.push(
-					{
-						latLng: [winner.latitude, winner.longitude],
-						iconOptions: {
-							html: iconOption,
-							className: 'dummy'
+        if(!$loading) {
+			loading.set(true);
+			dnsResultData = await fetch(`${window.location.origin}/dnsresults/`).then((x)=>x.json());
+			console.log(`fetched data for DNS monitors with prefix:${dnsResultData.includedMonitorPrefix}`)
+			let updatedWinnerResults = [];
+			dnsResultData.results.forEach( winner => {
+				if(showf5) {
+					let iconOption = `<div style='boarder: none;'><img src='/images/map-icon-${winner.winnerLogo}' style='width: 24px; height:auto;' title='${winner.winnerLatency}ms' border='0'></div>`;
+					updatedWinnerResults.push(
+						{
+							latLng: [winner.latitude, winner.longitude],
+							iconOptions: {
+								html: iconOption,
+								className: 'dummy'
+							}
 						}
-					}
-				) 
-			} else {
-				let iconOption = `<div style='boarder: none;'><img src='/images/map-icon-${winner.winnerLogoWithoutF5}' style='width: 24px; height:auto;' title='${winner.winnerLatencyWithoutF5}ms' border='0'></div>`;
-				updatedWinnerResults.push(
-					{
-						latLng: [winner.latitude, winner.longitude],
-						iconOptions: {
-							html: iconOption,
-							className: 'dummy'
+					) 
+				} else {
+					let iconOption = `<div style='boarder: none;'><img src='/images/map-icon-${winner.winnerLogoWithoutF5}' style='width: 24px; height:auto;' title='${winner.winnerLatencyWithoutF5}ms' border='0'></div>`;
+					updatedWinnerResults.push(
+						{
+							latLng: [winner.latitude, winner.longitude],
+							iconOptions: {
+								html: iconOption,
+								className: 'dummy'
+							}
 						}
-					}
-				)
-			}
-		});
-		winnerResults = updatedWinnerResults;
-		loading.set(0);
+					)
+				}
+			});
+			winnerResults = updatedWinnerResults;
+			loading.set(false);
+	    }
 	};
 	onMount(async () => {
+		/* load initial data */
 		loading.set(true);
 		await fetchHandler()
 		loading.set(false);
+		/* start data fetch loop */
         fetcherInterval = setInterval(fetchHandler, 10000)
 	});
 	onDestroy( async () => {
+		/* stop data fetch loop */
         clearInterval(fetcherInterval);
 	});
 	const togglelData = () => {
@@ -73,12 +79,10 @@
 	const revealF5 = () => {
 		fetchHandler();
 		showf5 = true;
-		tileColumns = 3;
 	}
 	const hideF5 = () => {
 		fetchHandler();
 		showf5 = false;
-		tileColumns = 3;
 	}
 
 </script>
@@ -88,10 +92,10 @@
 	<meta name="description" content="Test DNS Resolve Latency across F5 Distributed Cloud Observed Monitors" />
 </svelte:head>
 
-<div class='flex justify-center mb-3'>
+<div class='hidden md:flex justify-center mb-3'>
 	<div class="rounded-lg border border-gray-200 dark:border-gray-700 shadow-md" style="width: 70vh; height: 30vh;" >
 		{#if browser}
-			<LeafletMap options={mapOptions}>
+			<LeafletMap bind:this={map} options={mapOptions}>
 				<TileLayer url={tileUrl} options={tileLayerOptions}/>
 				{#if dnsResultData}
 					{#each winnerResults as result}
@@ -134,7 +138,7 @@
 				</div>
 			</Card>
 		{/if}
-		<div class="grid grid-cols-{tileColumns} gap-2">
+		<div class="grid lg:grid-cols-3 md:grid-cols-2 sm:grid-cols-1 gap-2">
 			{#each dnsResultData.monitors as monitor}
 				{#if ! monitor.name.endsWith(dnsResultData.f5MonitorSuffix) }
 					<div class="max-w-md mx-auto">
