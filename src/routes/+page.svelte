@@ -14,8 +14,6 @@
 	let showf5 = false;
 	let tileColumns = 3;
 
-	const f5TestName = 'test-f5xc';
-
     const mapOptions = {
         center: [53.137811, -35.737996],
         zoom: 2,
@@ -33,7 +31,7 @@
         let updatedWinnerResults = [];
 		dnsResultData.results.forEach( winner => {
 			if(showf5) {
-				let iconOption = `<div style='boarder: none;'><img src='/images/${winner.winnerLogo}' style='height: 24px; width:auto;' title='${winner.winnerLatency}ms' border='0'></div>`;
+				let iconOption = `<div style='boarder: none;'><img src='/images/map-icon-${winner.winnerLogo}' style='width: 24px; height:auto;' title='${winner.winnerLatency}ms' border='0'></div>`;
 				updatedWinnerResults.push(
 					{
 						latLng: [winner.latitude, winner.longitude],
@@ -44,7 +42,7 @@
 					}
 				) 
 			} else {
-				let iconOption = `<div style='boarder: none;'><img src='/images/${winner.winnerLogoWithoutF5}' style='height: 24px; width:auto;' title='${winner.winnerLatencyWithoutF5}ms' border='0'></div>`;
+				let iconOption = `<div style='boarder: none;'><img src='/images/map-icon-${winner.winnerLogoWithoutF5}' style='width: 24px; height:auto;' title='${winner.winnerLatencyWithoutF5}ms' border='0'></div>`;
 				updatedWinnerResults.push(
 					{
 						latLng: [winner.latitude, winner.longitude],
@@ -123,7 +121,7 @@
 					</div>
 					<div class='content-end ml-2 mt-2'>
 						{#each dnsResultData.monitors as monitor}
-							{#if showf5 && monitor.name === f5TestName}
+							{#if showf5 && monitor.name.endsWith(dnsResultData.f5MonitorSuffix)}
 							<ul>
 								<li class='text-sm break-keep'>latency: <b>{Math.round(monitor.latency)}ms</b></li>
 								<li class='text-sm break-keep'>avg: <b>{Math.round(monitor.averageLatency)}ms</b></li>
@@ -137,7 +135,7 @@
 		{/if}
 		<div class="grid grid-cols-{tileColumns} gap-2">
 			{#each dnsResultData.monitors as monitor}
-				{#if monitor.name != f5TestName}
+				{#if ! monitor.name.endsWith(dnsResultData.f5MonitorSuffix) }
 					<div class="max-w-md mx-auto">
 						<Card padding='sm' size='m' style="width:200px;">
 							<div class="flex justify-center">

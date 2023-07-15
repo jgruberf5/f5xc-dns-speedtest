@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   width="140"
+   height="140"
+   viewBox="0 0 140 140"
+   version="1.1"
+   preserveAspectRatio="xMidYMid"
+   id="svg261"
+   sodipodi:docname="map-icon-microsoft.svg"
+   inkscape:version="1.2.2 (b0a8486541, 2022-12-01)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:dc="http://purl.org/dc/elements/1.1/">
+  <defs
+     id="defs265" />
+  <sodipodi:namedview
+     id="namedview263"
+     pagecolor="#ffffff"
+     bordercolor="#999999"
+     borderopacity="1"
+     inkscape:showpageshadow="0"
+     inkscape:pageopacity="0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     showgrid="false"
+     inkscape:zoom="2.5273438"
+     inkscape:cx="-6.7264297"
+     inkscape:cy="54.800618"
+     inkscape:window-width="1434"
+     inkscape:window-height="773"
+     inkscape:window-x="50"
+     inkscape:window-y="89"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="svg261" />
+  <title
+     id="title245">Microsoft</title>
+  <g
+     id="g259"
+     transform="translate(14.371015,15.996667)">
+    <g
+       id="g257">
+      <polygon
+         fill="#f1511b"
+         points="51.939438,51.939438 0,51.939438 0,0 51.939438,0 "
+         id="polygon249" />
+      <polygon
+         fill="#80cc28"
+         points="109.28678,51.939438 57.347964,51.939438 57.347964,0 109.28678,0 "
+         id="polygon251" />
+      <polygon
+         fill="#00adef"
+         points="51.9382,109.30721 0,109.30721 0,57.367776 51.9382,57.367776 "
+         id="polygon253" />
+      <polygon
+         fill="#fbbc09"
+         points="109.28678,109.30721 57.347964,109.30721 57.347964,57.367776 109.28678,57.367776 "
+         id="polygon255" />
+    </g>
+  </g>
+  <metadata
+     id="metadata438">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:title>Microsoft</dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+</svg>
