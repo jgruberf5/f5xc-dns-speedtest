@@ -14,6 +14,10 @@ const monitorsListUrl = `https://${F5_XC_TENANT}.console.ves.volterra.io/api/obs
 let fetchedData = undefined;
 let f5xcRegionLatLongCache = undefined;
 
+export function clientGet() {
+    return fetchedData;
+}
+
 export async function getMonitors() {
     const endTime = new Date();
     let dataAge = 120000;
@@ -23,7 +27,7 @@ export async function getMonitors() {
     
     /* build cache of XC sites lat/long */
     if(! f5xcRegionLatLongCache) {
-        console.log(`retrieving monitoring details from ${F5_XC_TENANT}, in namespace: ${F5_XC_DNS_MONITOR_NAMESPACE}, with prefix: ${F5_XC_DNS_MONITOR_PREFIX}`)
+        //console.log(`retrieving monitoring details from ${F5_XC_TENANT}, in namespace: ${F5_XC_DNS_MONITOR_NAMESPACE}, with prefix: ${F5_XC_DNS_MONITOR_PREFIX}`)
         f5xcRegionLatLongCache = {};
         const f5xcRELatLongLookupUrl = `https://${F5_XC_TENANT}.console.ves.volterra.io/api/config/namespaces/default/sites?report_fields=`;
         const f5xcRELatLongLookupResponse = await fetch(f5xcRELatLongLookupUrl,  { method: 'GET', headers: f5XCeaders });
@@ -32,7 +36,7 @@ export async function getMonitors() {
             if(site.tenant === 'ves-io') {
                 for (const key in site.labels) {
                     if(key == 'ves.io/region') {
-                        console.log(`adding f5xc region ${site.labels[key]} at lat: ${site.object.spec.gc_spec.coordinates.latitude}, long: ${site.object.spec.gc_spec.coordinates.longitude}`)
+                        //console.log(`adding f5xc region ${site.labels[key]} at lat: ${site.object.spec.gc_spec.coordinates.latitude}, long: ${site.object.spec.gc_spec.coordinates.longitude}`)
                         f5xcRegionLatLongCache[site.labels[key]] = {
                             latitude: site.object.spec.gc_spec.coordinates.latitude,
                             longitude: site.object.spec.gc_spec.coordinates.longitude
@@ -68,6 +72,7 @@ export async function getMonitors() {
         const sourceSummaryList = await sourceSummaryResponse.json();
         sourceSummaryList.monitor_by_source.forEach( (monitorStatus) => {
             if(!monitorResults[monitorStatus.region]) {
+                // console.log(`adding region ${monitorStatus.region} to monitor results.`)
                 if(monitorStatus.provider == 'f5xc') {
                     monitorStatus.coordinates = f5xcRegionLatLongCache[monitorStatus.region];
                 }
@@ -85,24 +90,21 @@ export async function getMonitors() {
                     monitors: []
                 };
             }
-            
+            //console.log(`current non F5 winning latency is: ${monitorResults[monitorStatus.region].winnerLatencyWithoutF5}`)
+            //console.log(`current non F5 winning latency is: ${monitorResults[monitorStatus.region.winnerLatencyWithoutF5]} by ${monitorResults[monitorStatus.region].regionalWinnerWithoutF5}`);
             if(! monitorName.endsWith(F5_XC_F5_MONITOR_SUFFIX)) {
-                /*
-                console.log(`not F5: ${monitorName}`);
-                console.log(`current non F5 winning latency is: ${monitorResults[monitorStatus.region.winnerLatencyWithoutF5]} by ${monitorResults[monitorStatus.region].regionalWinnerWithoutF5}`);
-                console.log(`considering ${monitorName} with ${monitorStatus.region} latency of: ${monitorStatus.curr_latency}`);
-                */
-                if(monitorStatus.curr_latency < monitorResults[monitorStatus.region].winnerLatencyWithoutF5) {
+                //console.log(`not F5: ${monitorName}`);
+                //console.log(`current non F5 winning latency is: ${monitorResults[monitorStatus.region].winnerLatencyWithoutF5} by ${monitorResults[monitorStatus.region].regionalWinnerWithoutF5}`);
+                //console.log(`considering ${monitorName} with ${monitorStatus.region} latency of: ${monitorStatus.curr_latency}`);
+                if(parseFloat(monitorStatus.curr_latency) < parseFloat(monitorResults[monitorStatus.region].winnerLatencyWithoutF5)) {
                     monitorResults[monitorStatus.region].regionalWinnerWithoutF5 = monitorName
                     monitorResults[monitorStatus.region].winnerLatencyWithoutF5 = monitorStatus.curr_latency
                     monitorResults[monitorStatus.region].winnerLogoWithoutF5 = monitors[monitorName].logo
                 }
             }
-            /*
-            console.log(`current with F5 winning latency is: ${monitorResults[monitorStatus.region.winnerLatency]} by ${monitorResults[monitorStatus.region].regionalWinner}`);
-            console.log(`considering ${monitorName} with ${monitorStatus.region} latency of: ${monitorStatus.curr_latency}`);
-            */
-            if(monitorStatus.curr_latency < monitorResults[monitorStatus.region].winnerLatency) {
+            //console.log(`current with F5 winning latency is: ${monitorResults[monitorStatus.region].winnerLatency} by ${monitorResults[monitorStatus.region].regionalWinner}`);
+            //console.log(`considering ${monitorName} with ${monitorStatus.region} latency of: ${monitorStatus.curr_latency}`);
+            if(parseFloat(monitorStatus.curr_latency) < parseFloat(monitorResults[monitorStatus.region].winnerLatency)) {
                 monitorResults[monitorStatus.region].regionalWinner = monitorName
                 monitorResults[monitorStatus.region].winnerLatency = monitorStatus.curr_latency
                 monitorResults[monitorStatus.region].winnerLogo = monitors[monitorName].logo
@@ -140,3 +142,4 @@ export async function getMonitors() {
     fetchedData = monitorData;
     return monitorData;
 }
+
