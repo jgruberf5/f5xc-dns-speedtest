@@ -1,23 +1,23 @@
 import { env } from '$env/dynamic/private';
-
+​
 const F5_XC_API_KEY = env.F5_XC_API_KEY;
 const F5_XC_TENANT = env.F5_XC_TENANT;
 const F5_XC_DNS_MONITOR_NAMESPACE = env.F5_XC_DNS_MONITOR_NAMESPACE;
 const F5_XC_DNS_MONITOR_PREFIX = env.F5_XC_DNS_MONITOR_PREFIX;
 const F5_XC_F5_MONITOR_SUFFIX = env.F5_XC_F5_MONITOR_SUFFIX;
-
+​
 const f5XCeaders = {
     'Authorization': `APIToken ${F5_XC_API_KEY}`
 };
 const monitorsListUrl = `https://${F5_XC_TENANT}.console.ves.volterra.io/api/observability/synthetic_monitor/namespaces/${F5_XC_DNS_MONITOR_NAMESPACE}/v1_dns_monitors`;
-
+​
 let fetchedData = undefined;
 let f5xcRegionLatLongCache = undefined;
-
+​
 export function clientGet() {
     return fetchedData;
 }
-
+​
 export async function getMonitors() {
     const endTime = new Date();
     let dataAge = 120000;
@@ -46,7 +46,7 @@ export async function getMonitors() {
             }
         });
     }
-
+​
     const monitors = {}
     const monitorResults = {}
     const monitorListResponse = await fetch(monitorsListUrl, { method: 'GET', headers: f5XCeaders });
@@ -58,6 +58,26 @@ export async function getMonitors() {
             monitors[monitor.name] = { name: monitor.name, description: monitor.description, logo: monitor.labels.logo };
         }
     });
+​
+    const monitorNameList = Object.keys(monitors);
+​
+    // Collect all monitors with current latency per region
+    const monitorHealthUrl = `https://${F5_XC_TENANT}.console.ves.volterra.io/api/observability/synthetic_monitor/namespaces/${F5_XC_DNS_MONITOR_NAMESPACE}/dns-monitors-health`;
+    const body = JSON.stringify({ monitor_names: monitorNameList, include_latency: true })
+    
+    const monitorHealthResponse = await fetch(monitorHealthUrl, { method: 'POST', headers: f5XCeaders, body: body});
+    const monitorHealth = await monitorHealthResponse.json();
+​
+    const monitorMap = new Map();
+​
+    monitorHealth.items.forEach(item => {
+        const sourcesMap = new Map();
+        item.sources.forEach(source => {
+            sourcesMap.set(source.source, source.latency);
+        });
+        monitorMap.set(item.monitor_name, sourcesMap);
+    });
+​
     for (let monitorName in monitors) {
         /* 2 min window */
         const startTime = new Date(endTime.getTime() - 2*60000);
@@ -67,20 +87,14 @@ export async function getMonitors() {
         monitors[monitorName]['latency'] = monitorSummary.latency;
         monitors[monitorName]['averageLatency'] = monitorSummary.avg_latency;
         monitors[monitorName]['maximumLatency'] = monitorSummary.max_latency;
-        const sourceSummaryUrl = `https://${F5_XC_TENANT}.console.ves.volterra.io/api/observability/synthetic_monitor/namespaces/${F5_XC_DNS_MONITOR_NAMESPACE}/source-summary?monitorName=${monitorName}&monitorType=dns`;
-        const sourceSummaryResponse = await fetch(sourceSummaryUrl, { method: 'GET', headers: f5XCeaders });
-        const sourceSummaryList = await sourceSummaryResponse.json();
-        sourceSummaryList.monitor_by_source.forEach( (monitorStatus) => {
-            if(!monitorResults[monitorStatus.region]) {
-                // console.log(`adding region ${monitorStatus.region} to monitor results.`)
-                if(monitorStatus.provider == 'f5xc') {
-                    monitorStatus.coordinates = f5xcRegionLatLongCache[monitorStatus.region];
-                }
-                monitorResults[monitorStatus.region] = {
-                    region: monitorStatus.region,
-                    latitude: monitorStatus.coordinates.latitude,
-                    longitude: monitorStatus.coordinates.longitude,
-                    provider: monitorStatus.provider,
+        
+        // Rather than calling source summary for every monitor, we can use the values stored in monitorMap
+        if (monitorMap.has(monitorName)) {
+            let coordinates; 
+            const regionalLatency = monitorMap.get(monitorName);
+            regionalLatency.forEach((latency, source) => {
+                monitorResults[source] = {
+                    region: source,
                     regionalWinner: undefined,
                     regionalWinnerWithoutF5: undefined,
                     winnerLatency: 2000000,
@@ -89,35 +103,39 @@ export async function getMonitors() {
                     winnerLogoWithoutF5: undefined,
                     monitors: []
                 };
-            }
-            //console.log(`current non F5 winning latency is: ${monitorResults[monitorStatus.region].winnerLatencyWithoutF5}`)
-            //console.log(`current non F5 winning latency is: ${monitorResults[monitorStatus.region.winnerLatencyWithoutF5]} by ${monitorResults[monitorStatus.region].regionalWinnerWithoutF5}`);
-            if(! monitorName.endsWith(F5_XC_F5_MONITOR_SUFFIX)) {
-                //console.log(`not F5: ${monitorName}`);
-                //console.log(`current non F5 winning latency is: ${monitorResults[monitorStatus.region].winnerLatencyWithoutF5} by ${monitorResults[monitorStatus.region].regionalWinnerWithoutF5}`);
-                //console.log(`considering ${monitorName} with ${monitorStatus.region} latency of: ${monitorStatus.curr_latency}`);
-                if(parseFloat(monitorStatus.curr_latency) < parseFloat(monitorResults[monitorStatus.region].winnerLatencyWithoutF5)) {
-                    monitorResults[monitorStatus.region].regionalWinnerWithoutF5 = monitorName
-                    monitorResults[monitorStatus.region].winnerLatencyWithoutF5 = monitorStatus.curr_latency
-                    monitorResults[monitorStatus.region].winnerLogoWithoutF5 = monitors[monitorName].logo
+​
+                if (source.includes("ves-io-")) {
+                    coordinates = f5xcRegionLatLongCache[source];
+                    monitorResults[source]["latitude"] = coordinates.latitude;
+                    monitorResults[source]["longitude"] = coordinates.longitude;
+                    monitorResults[source]["provider"] = "f5xc"
+                } else {
+                    monitorResults[source]["provider"] = "aws";
                 }
-            }
-            //console.log(`current with F5 winning latency is: ${monitorResults[monitorStatus.region].winnerLatency} by ${monitorResults[monitorStatus.region].regionalWinner}`);
-            //console.log(`considering ${monitorName} with ${monitorStatus.region} latency of: ${monitorStatus.curr_latency}`);
-            if(parseFloat(monitorStatus.curr_latency) < parseFloat(monitorResults[monitorStatus.region].winnerLatency)) {
-                monitorResults[monitorStatus.region].regionalWinner = monitorName
-                monitorResults[monitorStatus.region].winnerLatency = monitorStatus.curr_latency
-                monitorResults[monitorStatus.region].winnerLogo = monitors[monitorName].logo
-            }
-
-            const resultObj = {
-                name: monitorName,
-                latency: monitorStatus.curr_latency,
-                critical: monitorStatus.critical_count,
-                healthy: monitorStatus.healthy_count
-            }
-            monitorResults[monitorStatus.region]['monitors'].push(resultObj);
-        })
+​
+                if(! monitorName.endsWith(F5_XC_F5_MONITOR_SUFFIX)) {
+                    if(parseFloat(latency) < parseFloat(monitorResults[source].winnerLatencyWithoutF5)) {
+                        monitorResults[source].regionalWinnerWithoutF5 = monitorName;
+                        monitorResults[source].winnerLatencyWithoutF5 = latency;
+                        monitorResults[source].winnerLogoWithoutF5 = monitors[monitorName].logo;
+                    }
+                }
+​
+                //console.log(`current with F5 winning latency is: ${monitorResults[monitorStatus.region].winnerLatency} by ${monitorResults[monitorStatus.region].regionalWinner}`);
+                //console.log(`considering ${monitorName} with ${monitorStatus.region} latency of: ${monitorStatus.curr_latency}`);
+                if(parseFloat(latency) < parseFloat(monitorResults[source].winnerLatency)) {
+                    monitorResults[source].regionalWinner = monitorName
+                    monitorResults[source].winnerLatency = latency
+                    monitorResults[source].winnerLogo = monitors[monitorName].logo
+                }
+​
+                const resultObj = {
+                    name: monitorName,
+                    latency: latency,
+                }
+                monitorResults[source]['monitors'].push(resultObj);
+            });   
+        }
     }
     // build sorted list for delivery
     const monitorDataList = [];
@@ -142,4 +160,3 @@ export async function getMonitors() {
     fetchedData = monitorData;
     return monitorData;
 }
-
