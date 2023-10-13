@@ -16,22 +16,18 @@
 	let map = undefined;
 
     const mapOptions = {
-        center: [53.137811, -35.737996],
+        center: [16.278072, 19.061878],
         zoom: 2,
-        zoomControl: false,
+        zoomControl: true,
         doubleClickZoom: false,
         boxZoom: false,
-        dragging: false
+        dragging: true
     };
     const tileUrl = 'https://tile.jawg.io/jawg-light/{z}/{x}/{y}{r}.png?access-token=GONv9dFvCU616XgdkgIHBClBblHTuCm9004cJSwc2gsp2AEkTACEm7mIYKtPKq2H';
     const tileLayerOptions = { };
 
-	const fetchHandler = async () => {
-        if(!$loading) {
-			loading.set(true);
-			dnsResultData = await fetch(`${window.location.origin}/dnsresults/`).then((x)=>x.json());
-			console.log(`fetched data for DNS monitors with prefix:${dnsResultData.includedMonitorPrefix}`)
-			let updatedWinnerResults = [];
+    const updatedWinnerResults = () => {
+		let updatedWinnerResults = [];
 			dnsResultData.results.forEach( winner => {
 				if(showf5) {
 					let iconOption = `<div style='boarder: none;'><img src='/images/map-icon-${winner.winnerLogo}' style='width: 24px; height:auto;' title='${winner.winnerLatency}ms' border='0'></div>`;
@@ -58,6 +54,14 @@
 				}
 			});
 			winnerResults = updatedWinnerResults;
+	}
+
+	const fetchHandler = async () => {
+        if(!$loading) {
+			loading.set(true);
+			dnsResultData = await fetch(`${window.location.origin}/dnsresults/`).then((x)=>x.json());
+			console.log(`fetched data for DNS monitors with prefix:${dnsResultData.includedMonitorPrefix}`)
+			updatedWinnerResults();
 			loading.set(false);
 	    }
 	};
@@ -76,12 +80,12 @@
 		showdata = !showdata;
 	}
 	const revealF5 = () => {
-		fetchHandler();
 		showf5 = true;
+		updatedWinnerResults();
 	}
 	const hideF5 = () => {
-		fetchHandler();
 		showf5 = false;
+		updatedWinnerResults();
 	}
 
 </script>
@@ -92,7 +96,7 @@
 </svelte:head>
 
 <div class='hidden md:flex justify-center mb-3'>
-	<div class="rounded-lg border border-gray-200 dark:border-gray-700 shadow-md" style="width: 70vh; height: 30vh;" >
+	<div class="rounded-lg border border-gray-200 dark:border-gray-700 shadow-md" style="width: 95vh; height: 45vh;" >
 		{#if browser}
 			<LeafletMap bind:this={map} options={mapOptions}>
 				<TileLayer url={tileUrl} options={tileLayerOptions}/>
@@ -166,7 +170,7 @@
 <section>
 	<div class='flex justify-center mb-3 mt-3'>
 		{#if dnsResultData}
-		    <a alt='Toggle Data Visible' on:click={togglelData}>&Pi;</a><br/>
+		    <span class="text-xs">last data:</span> <a alt='Toggle Data Visible' on:click={togglelData} class='ml-2 text-xs text-black font-mono font-normal'>{dnsResultData.collected}</a><br/>
 		{/if}
 	</div>
 	<div class='flex justify-center mb-3 mt-3'>
