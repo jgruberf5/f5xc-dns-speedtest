@@ -26,10 +26,10 @@ async function initialize() {
         if (site.tenant === 'ves-io') {
             for (const key in site.labels) {
                 if (key == 'ves.io/region') {
-                    console.log(`adding f5xc region ${site.labels[key]} at lat: ${site.object.spec.gc_spec.coordinates.latitude}, long: ${site.object.spec.gc_spec.coordinates.longitude}`)
+                    console.log(`adding f5xc region ${site.labels[key]} at lat: ${site.get_spec.coordinates.latitude}, long: ${site.get_spec.coordinates.longitude}`)
                     f5xcRegionLatLongCache[site.labels[key]] = {
-                        latitude: site.object.spec.gc_spec.coordinates.latitude,
-                        longitude: site.object.spec.gc_spec.coordinates.longitude
+                        latitude: site.get_spec.coordinates.latitude,
+                        longitude: site.get_spec.coordinates.longitude
                     }
                 }
             }
@@ -90,7 +90,7 @@ export async function getMonitors() {
         const monitorHealthBody = JSON.stringify({ monitor_names: monitorNameList, include_latency: true })
         const monitorHealthResponse = await fetch(monitorHealthUrl, { method: 'POST', headers: f5XCeaders, body: monitorHealthBody });
         const monitorHealth = await monitorHealthResponse.json();
-        fs.writeFileSync('monitor_health.json', JSON.stringify(monitorHealth, null, 2), { encoding: 'utf8', flag: 'w' });
+        // fs.writeFileSync('monitor_health.json', JSON.stringify(monitorHealth, null, 2), { encoding: 'utf8', flag: 'w' });
         monitorHealth.items.forEach(monitor_health => {
             monitor_health.sources.forEach(source => {
                 if (!monitorResults[source.source]) {
